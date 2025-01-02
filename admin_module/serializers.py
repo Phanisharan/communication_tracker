@@ -51,4 +51,4 @@ class CommunicationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Communication
-        fields = '__all__'
+        fields = ['id', 'company', 'method', 'date', 'notes', 'status', 'due_date']
