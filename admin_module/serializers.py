@@ -14,11 +14,11 @@ class CompanySerializer(serializers.ModelSerializer):
         # Get the last 5 communications for the company, ordered by date
         communications = Communication.objects.filter(company=obj).order_by('-date')[:5]
         
-        # Add the type field to each communication
+        # Add the type field to each communication based on the method
         communications_data = CommunicationSerializer(communications, many=True).data
         for communication in communications_data:
-            # Assuming the 'communication_type' is the field in the Communication model that defines the type
-            communication['type'] = communication.get('communication_type', 'Unknown')  # Default to 'Unknown' if no type is provided
+            # Add the communication type based on the method's name
+            communication['type'] = communication.get('method', {}).get('name', 'Unknown')  # Default to 'Unknown' if no method
         
         return communications_data
 
