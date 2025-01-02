@@ -25,10 +25,14 @@ class CompanySerializer(serializers.ModelSerializer):
 
 
     def get_nextScheduledCommunication(self, obj):
-        today = timezone.now().date()  # Get today's date in a timezone-aware way
-        communication = Communication.objects.filter(company=obj, date__gte=today).order_by('date').first()
+        communication = Communication.objects.filter(company=obj, date__gte=datetime.today()).order_by('date').first()
         if communication:
-            return CommunicationSerializer(communication).data
+            return {
+                "method": communication.method.name,
+                "date": communication.date.strftime('%Y-%m-%d'),  # Format date as 'YYYY-MM-DD'
+                "notes": communication.notes,
+                "status": communication.status
+            }
         return None
 
 
