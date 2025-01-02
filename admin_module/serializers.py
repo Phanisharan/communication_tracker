@@ -13,17 +13,23 @@ class CompanySerializer(serializers.ModelSerializer):
     def get_lastFiveCommunications(self, obj):
         # Get the last 5 communications for the company, ordered by date
         communications = Communication.objects.filter(company=obj).order_by('-date')[:5]
-        return CommunicationSerializer(communications, many=True).data
+        
+        # Add the type field to each communication
+        communications_data = CommunicationSerializer(communications, many=True).data
+        for communication in communications_data:
+            # Assuming the 'communication_type' is the field in the Communication model that defines the type
+            communication['type'] = communication.get('communication_type', 'Unknown')  # Default to 'Unknown' if no type is provided
+        
+        return communications_data
 
     def get_nextScheduledCommunication(self, obj):
         # Get the next scheduled communication, filtering for future communications
         communication = Communication.objects.filter(company=obj, date__gte=datetime.today()).order_by('date').first()
         if communication:
-            # Include the type of communication along with other fields
-            communication_data = CommunicationSerializer(communication).data
-            communication_data['type'] = communication.communication_type  # Assuming `communication_type` is the field for type
-            return communication_data
+            # Return the data without adding the 'type' field
+            return CommunicationSerializer(communication).data
         return None
+
 
 class CommunicationMethodSerializer(serializers.ModelSerializer):
     type = serializers.CharField(source='name')  # Serialize 'name' as 'type'
