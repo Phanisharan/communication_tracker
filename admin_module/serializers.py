@@ -10,25 +10,20 @@ class CompanySerializer(serializers.ModelSerializer):
         model = Company
         fields = ['id', 'name', 'location', 'linkedin_profile', 'emails', 'phone_numbers', 'comments', 'communication_periodicity', 'lastFiveCommunications', 'nextScheduledCommunication']
 
-
     def get_lastFiveCommunications(self, obj):
-        # Return static data for last five communications
-        return [
-            {"type": "Email", "date": "2025-03-01", "notes": "Initial communication regarding new product launch."},
-            {"type": "Phone Call", "date": "2024-01-01", "notes": "Follow-up on marketing partnership discussion."},
-            {"type": "LinkedIn Message", "date": "2023-12-10", "notes": "Connection request with senior management."},
-            {"type": "Email", "date": "2023-11-15", "notes": "Follow-up email regarding project proposal."},
-            {"type": "Phone Call", "date": "2023-11-10", "notes": "Discussion about future collaboration."}
-        ]
+        # Get the last 5 communications for the company, ordered by date
+        communications = Communication.objects.filter(company=obj).order_by('-date')[:5]
+        return CommunicationSerializer(communications, many=True).data
 
     def get_nextScheduledCommunication(self, obj):
-        # Return static data for next scheduled communication
-        return {
-            "type": "Email",
-            "date": "2025-03-10",
-            "notes": "Reminder email for upcoming product launch."
-        }
-
+        # Get the next scheduled communication, filtering for future communications
+        communication = Communication.objects.filter(company=obj, date__gte=datetime.today()).order_by('date').first()
+        if communication:
+            # Include the type of communication along with other fields
+            communication_data = CommunicationSerializer(communication).data
+            communication_data['type'] = communication.communication_type  # Assuming `communication_type` is the field for type
+            return communication_data
+        return None
 
 class CommunicationMethodSerializer(serializers.ModelSerializer):
     type = serializers.CharField(source='name')  # Serialize 'name' as 'type'
