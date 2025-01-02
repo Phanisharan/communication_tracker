@@ -42,6 +42,7 @@ class CommunicationMethodSerializer(serializers.ModelSerializer):
 class CommunicationSerializer(serializers.ModelSerializer):
     company = serializers.PrimaryKeyRelatedField(queryset=Company.objects.all())
     method = CommunicationMethodSerializer()
+    status = serializers.CharField()
 
     class Meta:
         model = Communication
