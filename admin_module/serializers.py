@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Company, CommunicationMethod, Communication
 from datetime import datetime
+from django.utils import timezone
 
 class CompanySerializer(serializers.ModelSerializer):
     lastFiveCommunications = serializers.SerializerMethodField()
@@ -22,11 +23,11 @@ class CompanySerializer(serializers.ModelSerializer):
         
         return communications_data
 
+
     def get_nextScheduledCommunication(self, obj):
-        # Get the next scheduled communication, filtering for future communications
-        communication = Communication.objects.filter(company=obj, date__gte=datetime.today()).order_by('date').first()
+        today = timezone.now().date()  # Get today's date in a timezone-aware way
+        communication = Communication.objects.filter(company=obj, date__gte=today).order_by('date').first()
         if communication:
-            # Return the data without adding the 'type' field
             return CommunicationSerializer(communication).data
         return None
 
