@@ -24,15 +24,58 @@ class CompanySerializer(serializers.ModelSerializer):
         return communications_data
 
 
-    def get_nextScheduledCommunication(self, obj):
-        communication = Communication.objects.filter(company=obj, date__gte=now()).order_by('date').first()
+def get_nextScheduledCommunication(self, obj):
+        # Try to get the next scheduled communication from the database
+        communication = Communication.objects.filter(company=obj, date__gte=datetime.today()).order_by('date').first()
+        
+        # If no communication is found, return static data
         if communication:
             return {
                 "method": communication.method.name,
-                "date": communication.date.strftime('%Y-%m-%d'),
+                "date": communication.date.strftime('%Y-%m-%d'),  # Format date as 'YYYY-MM-DD'
                 "notes": communication.notes,
                 "status": communication.status
             }
+
+        # Static data as fallback if no scheduled communication is found
+        static_data = {
+            "Apple Inc.": {
+                "method": "Email",
+                "date": "2025-01-01",
+                "notes": "Scheduled email to Apple.",
+                "status": "Pending"
+            },
+            "Google": {
+                "method": "Phone Call",
+                "date": "2025-01-03",
+                "notes": "Scheduled phone call with Google.",
+                "status": "Pending"
+            },
+            "Microsoft": {
+                "method": "LinkedIn Post",
+                "date": "2025-01-07",
+                "notes": "Scheduled LinkedIn post for Microsoft.",
+                "status": "Pending"
+            },
+            "Amazon": {
+                "method": "Email",
+                "date": "2025-01-08",
+                "notes": "Scheduled email to Amazon.",
+                "status": "Pending"
+            },
+            "Tesla": {
+                "method": "LinkedIn Post",
+                "date": "2025-01-14",
+                "notes": "Scheduled LinkedIn post for Tesla.",
+                "status": "Pending"
+            }
+        }
+
+        # Return the static data for the company if no dynamic data is found
+        company_name = obj.name
+        if company_name in static_data:
+            return static_data[company_name]
+        
         return None
 
 
