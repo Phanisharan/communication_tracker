@@ -131,6 +131,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "https://communication-tracker-pjfr.vercel.app",
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
