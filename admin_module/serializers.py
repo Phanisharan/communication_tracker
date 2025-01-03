@@ -23,11 +23,10 @@ class CompanySerializer(serializers.ModelSerializer):
         
         return communications_data
 
-
-def get_nextScheduledCommunication(self, obj):
+    def get_nextScheduledCommunication(self, obj):
         # Try to get the next scheduled communication from the database
-        communication = Communication.objects.filter(company=obj, date__gte=datetime.today()).order_by('date').first()
-        
+        communication = Communication.objects.filter(company=obj, date__gte=now()).order_by('date').first()
+
         # If no communication is found, return static data
         if communication:
             return {
@@ -79,13 +78,12 @@ def get_nextScheduledCommunication(self, obj):
         return None
 
 
-
 class CommunicationMethodSerializer(serializers.ModelSerializer):
     type = serializers.CharField(source='name')  # Serialize 'name' as 'type'
 
     class Meta:
         model = CommunicationMethod
-        fields = ['id', 'name', 'description', 'sequence', 'is_mandatory', 'type']  
+        fields = ['id', 'name', 'description', 'sequence', 'is_mandatory', 'type']
 
 
 class CommunicationSerializer(serializers.ModelSerializer):
