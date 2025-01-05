@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from rest_framework.response import Response
 from rest_framework import viewsets
 from .models import Report
+from reportlab.pdfgen import canvas
 from .serializers import ReportSerializer
 import csv
 
@@ -26,10 +27,29 @@ def download_csv_report(request):
 
     return response
 
-# View for downloading PDF report
+
 def download_pdf_report(request):
-    # Implementation for downloading PDF report (use a library like ReportLab)
-    pass
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="reports.pdf"'
+
+    p = canvas.Canvas(response)
+
+    reports = Report.objects.all()
+    p.drawString(100, 800, "Reports Summary")
+    y = 780  
+    for report in reports:
+        text = f"Company: {report.company.name}, Date: {report.report_date}, Summary: {report.summary}"
+        p.drawString(100, y, text)
+        y -= 20 
+        
+        if y < 50:
+            p.showPage()
+            y = 800
+
+    p.save()
+
+    return response
 
 # Communication Frequency View
 class CommunicationFrequencyView(APIView):
